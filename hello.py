@@ -4,21 +4,34 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_wtf import FlaskForm
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail,Message
 from wtforms import StringField,SubmitField
 from wtforms.validators import DataRequired
 from datetime import datetime
+from threading import Thread
 import os,pymysql
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'This is jack-hug\'s KEY'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:HUANGzeng123@localhost/flask_twice'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#smtp邮箱服务器连接
+app.config['MAIL_SERVER'] = 'smtp.qq.com'
+app.config['MAIL_PORT'] = '587'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky_晃晃]'
+app.config['FLASKY_MAIL_SENDER'] = 'Flasky Admin <46361381@qq.com>'
+app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
+
 
 
 bootstrap = Bootstrap(app)
 manager = Manager(app)
 moment = Moment(app)
 db = SQLAlchemy(app)
+mail = Mail(app)
  
 class NameForm(FlaskForm):
     name = StringField('What\'s your name?',validators=[DataRequired()])
@@ -46,6 +59,17 @@ def make_shell_context():
     return dict(app = app ,db = db ,User = User,Role = Role)
 manager.add_command('shell',Shell(make_context=make_shell_context))
 
+def send_async_email(app,msg):
+    with app.app_context():
+        mail.send(msg)
+    
+def send_mail(to,subject,template,**kwargs):
+    msg = Message(app.config['FLASKY_MAIL_SUBJECT_PREFIX']+subject,sender=app.config['FLASKY_MAIL_SENDER'],recipients=[to])
+    msg.body=render_template(template + '.txt',**kwargs)
+    msg.html=render_template(template+'.html',**kwargs)
+    thr = Thread(target=send_async_email,args=[app,msg])
+    thr.start()
+    return thr
 
 @app.route('/',methods = ['GET','POST'])
 def index():
@@ -57,6 +81,8 @@ def index():
             db.session.add(user)
             db.session.commit()
             session['known'] = False
+            if app.config['FLASKY_ADMIN']:
+                send_mail(app.config['FLASKY_ADMIN'],"一个小萌新",'mail/new_user',user = user)
         else:
             session['known'] = True
         # old_name = session.get('name')
