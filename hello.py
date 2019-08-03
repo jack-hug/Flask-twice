@@ -5,6 +5,7 @@ from flask_moment import Moment
 from flask_wtf import FlaskForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail,Message
+from flask_migrate import Migrate,MigrateCommand
 from wtforms import StringField,SubmitField
 from wtforms.validators import DataRequired
 from datetime import datetime
@@ -21,7 +22,7 @@ app.config['MAIL_PORT'] = '587'
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky_晃晃]'
+app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky_晃]'
 app.config['FLASKY_MAIL_SENDER'] = 'Flasky Admin <46361381@qq.com>'
 app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
 
@@ -32,6 +33,9 @@ manager = Manager(app)
 moment = Moment(app)
 db = SQLAlchemy(app)
 mail = Mail(app)
+
+migrate = Migrate(app,db)
+manager.add_command('db',MigrateCommand)
  
 class NameForm(FlaskForm):
     name = StringField('What\'s your name?',validators=[DataRequired()])
@@ -104,6 +108,8 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'),500
+
+
 
 if __name__ == "__main__":
     manager.run()
