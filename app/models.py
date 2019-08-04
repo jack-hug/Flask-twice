@@ -19,7 +19,6 @@ class User(db.Model,UserMixin):
     role_id = db.Column(db.Integer,db.ForeignKey('roles.id'))
     #用户登录
     email = db.Column(db.String(64),unique = True,index = True)
-    username = db.Column(db.String(64),unique = True,index = True)
     password_hash = db.Column(db.String(128))
 
     def __repr__(self):

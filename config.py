@@ -1,4 +1,4 @@
-import os,pymysql
+import os,mysql.connector
 
 class Config():
     SECRET_KEY = 'This is jack-hug\'s KEY' or os.environ.get('SECRET_KEY')
@@ -20,14 +20,14 @@ class Development(Config):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or '46361381@qq.com'
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'hxbomrvbrqzabifg'
     #数据库连接
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:HUANGzeng123@localhost/flask_twice_dev'
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:HUANGzeng123@localhost/flask_twice_dev'
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:HUANGzeng123@localhost/flask_twice_test'
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:HUANGzeng123@localhost/flask_twice_test'
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:HUANGzeng123@localhost/flask_twice'
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:HUANGzeng123@localhost/flask_twice'
 
 config = {
     'development':Development,
