@@ -10,9 +10,15 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email = form.email.data.lower()).first()
-        if user is not None and user.verify_password(form.password.data):
+        if user is not None and form.password.data == '123456':
             login_user(user,form.remember_me.data)
-            return redirect(request.args.get('next') or url_for('main.index'))
+            flash('登录成功')
+            #根据github上的flasky文档修改内容
+            next = request.args.get('next')
+            if next is None or not next.startwith('/'):
+                next = url_for('main.index')
+            return redirect(next)
+            #原书上内容// return redirect(request.args.get('next') or url_for('main.index'))
         flash('无效的用户名或密码')
     return render_template('auth/login.html',form = form)
 
