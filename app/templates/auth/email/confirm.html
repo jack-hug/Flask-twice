@@ -1,0 +1,10 @@
+<p>亲爱的{{ user.username }}：</p>
+<p>
+    欢迎注册！<br>
+    请点击下面的链接来确认你的帐户：<br>
+    <a href="{{ url_for('auth.confirm',token = token, _external = True) }}">点此此处</a>
+</p>
+<p>或者你可以复制链接地址到地址栏直接打开</p>
+<p>{{ url_for('auth.confirm',token = token, _external = True) }}</p>
+
+<p>来自flasky的团队。</p>

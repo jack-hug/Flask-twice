@@ -1,7 +1,7 @@
 import os,mysql.connector
 
 class Config():
-    SECRET_KEY = 'This is jack-hug\'s KEY' or os.environ.get('SECRET_KEY')
+    SECRET_KEY = 'This is your KEY' or os.environ.get('SECRET_KEY') 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky_晃]'
     FLASKY_MAIL_SENDER = 'Flasky Admin <46361381@qq.com>'
