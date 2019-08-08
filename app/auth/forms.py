@@ -45,6 +45,6 @@ class ChangeEmailForm(FlaskForm):
     password = PasswordField('密码',validators=[DataRequired()])
     submit = SubmitField('修改')
     
-    def verify_email(self,field):
+    def validate_email(self,field):
         if User.query.filter_by(email = field.data.lower()).first():
             raise ValidationError('邮箱已经存在')

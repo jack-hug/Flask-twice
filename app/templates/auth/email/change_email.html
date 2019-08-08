@@ -1,0 +1,8 @@
+<p>
+    请点击下面的链接来认证你重设的邮箱：<br>
+    <a href="{{ url_for('auth.change_email',token = token, _external = True) }}">点此此处</a>
+</p>
+<p>或者你可以复制链接地址到地址栏直接打开</p>
+<p>{{ url_for('auth.change_email',token = token, _external = True) }}</p>
+
+<p>来自flasky的团队。</p>

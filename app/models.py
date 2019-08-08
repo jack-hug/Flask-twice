@@ -74,10 +74,11 @@ class User(UserMixin, db.Model):
         new_email = data.get('new_email')
         if new_email is None:
             return False
-        if self.query.filty_by(emial = new_email).first() is not None:
+        if self.query.filter_by(email = new_email).first() is not None:
             return False
         self.email = new_email
         db.session.add(self)
+        return True
         
 
     @property

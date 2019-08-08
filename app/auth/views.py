@@ -64,7 +64,7 @@ def unconfirmed():
         return redirect(url_for('main.index'))
     return render_template('auth/unconfirmed.html')
 
-#重新发送电子邮件
+#重新发送认证电子邮件
 @auth.route('/confirm')
 @login_required
 def resend_confirmation():
@@ -129,5 +129,33 @@ def reset_password(token):
         else:
             return redirect(url_for('main.index'))
     return render_template('auth/reset_password.html',form = form)
+
+#修改邮箱请求
+@auth.route('/change_email',methods = ['GET','POST'])
+@login_required
+def change_email_request():
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.password.data):
+            new_email = form.email.data.lower()
+            token = current_user.generate_email_change_token(new_email)
+            send_mail(new_email,'你正在重设邮箱，请确认','auth/email/change_email',user = current_user,token = token)
+            flash('一封邮箱已经发送到您的邮箱，请根据邮箱内容进行操作')
+            return redirect(url_for('main.index'))
+        else:
+            flash('邮箱或密码错误')
+    return render_template('auth/change_email.html',form = form)
+
+#确认修改邮箱
+@auth.route('/change_email/<token>')
+@login_required
+def change_email(token):
+    if current_user.change_email(token):
+        db.session.commit()
+        flash('你的邮箱已经成功修改')
+    else:
+        flash('无效或过期链接')
+    return redirect(url_for('main.index'))
+
 
         
