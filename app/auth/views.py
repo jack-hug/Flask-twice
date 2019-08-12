@@ -54,8 +54,10 @@ def confirm(token):
 #过滤未确认邮箱的用户
 @auth.before_app_request
 def before_request():
-    if current_user.is_authenticated and not current_user.confirmed and request.endpoint[:5] != 'auth.' and request.endpoint !='static':
-        return redirect(url_for('auth.unconfirmed'))
+    if current_user.is_authenticated:
+        current_user.ping()
+        if not current_user.confirmed and request.endpoint[:5] != 'auth.' and request.endpoint !='static':
+            return redirect(url_for('auth.unconfirmed'))
 
 #转到未确认帐户模板
 @auth.route('/unconfirmed')

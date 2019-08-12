@@ -3,6 +3,7 @@ from flask_login import UserMixin,AnonymousUserMixin
 from . import db, login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
+from datetime import datetime
 
 
 class Role(db.Model):
@@ -19,7 +20,7 @@ class Role(db.Model):
             'User':(Permission.FOLLOW | Permission.COMMENT | Permission.WRITE_ARTICLES,True),
             'Moderator':(Permission.FOLLOW | Permission.COMMENT | Permission.WRITE_ARTICLES | Permission.MODERATE_COMMENTS,False),
             'Administrator':(0xff,False)
-        }
+        } 
         for r in roles:
             role = Role.query.filter_by(name = r).first()
             if role is None:
@@ -49,6 +50,17 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     #检验令牌
     confirmed = db.Column(db.Boolean,default = False)
+    #用户资料
+    name = db.Column(db.String(64))
+    location = db.Column(db.String(64))
+    about_me = db.Column(db.Text())
+    last_seen = db.Column(db.DateTime(),default = datetime.utcnow)
+    member_since = db.Column(db.DateTime(),default = datetime.utcnow)
+
+    #每次登录后刷新last_seen时间
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
 
     def __init__(self,**kwargs):
         super(User,self).__init__(**kwargs)
@@ -142,6 +154,7 @@ class AnonymousUser(AnonymousUserMixin):
         return False
 
 login_manager.anonymous_user = AnonymousUser
+
 
 @login_manager.user_loader
 def load_user(user_id):
