@@ -6,6 +6,16 @@ from flask import current_app
 from datetime import datetime
 
 
+class Permission:
+    FOLLOW = 0X01
+    COMMENT = 0X02
+    WRITE_ARTICLES = 0X04
+    MODERATE_COMMENTS = 0X08
+    ADMINISTER = 0X80
+
+    def __repr__(self):
+        return '<Role %r>' % self.name
+
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
@@ -29,17 +39,6 @@ class Role(db.Model):
                 role.default = roles[r][1]
                 db.session.add(role)
             db.session.commit()
-
-class Permission:
-    FOLLOW = 0X01
-    COMMENT = 0X02
-    WRITE_ARTICLES = 0X04
-    MODERATE_COMMENTS = 0X08
-    ADMINISTER = 0X80
-
-    def __repr__(self):
-        return '<Role %r>' % self.name
-
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -66,7 +65,7 @@ class User(UserMixin, db.Model):
         super(User,self).__init__(**kwargs)
         if self.role is None:
             if self.email == current_app.config['FLASKY_ADMIN']:
-                self.role = Role.query.filter_by(permission = 0xff).first()
+                self.role = Role.query.filter_by(permissions = 0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default = True).first()
 
@@ -145,7 +144,7 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
-
+    
 class AnonymousUser(AnonymousUserMixin):
     def can(self,permissions):
         return False
