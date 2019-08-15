@@ -3,9 +3,9 @@ from wtforms import StringField,SubmitField,TextAreaField,BooleanField,SelectFie
 from wtforms.validators import DataRequired,Length,Email,Regexp,ValidationError
 from ..models import Role,User
 
-class NameForm(FlaskForm):
-    name = StringField('What\'s your name?',validators=[DataRequired()])
-    submit = SubmitField('submit')
+class PostForm(FlaskForm):
+    body = TextAreaField('文章内容',validators=[DataRequired()])
+    submit = SubmitField('提交')
 
 class EditProfileForm(FlaskForm):
     name = StringField('真实姓名',validators=[Length(0,64)])

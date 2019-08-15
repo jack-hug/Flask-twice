@@ -6,6 +6,15 @@ from .forms import LoginForm,RegistrationForm,ChangePasswordForm,ResetPasswordFo
 from .. import db
 from ..email import send_mail
 
+
+#过滤未确认邮箱的用户 更新最后访问时间
+@auth.before_app_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.ping()
+        if not current_user.confirmed and request.endpoint[:5] != 'auth.' and request.endpoint !='static':
+            return redirect(url_for('auth.unconfirmed'))
+
 #登录路由
 @auth.route('/login',methods = ['GET','POST'])
 def login():
@@ -50,14 +59,6 @@ def confirm(token):
     else:
         flash('这是一个无效链接或者链接已经过期')
     return redirect(url_for('main.index'))
-
-#过滤未确认邮箱的用户
-@auth.before_app_request
-def before_request():
-    if current_user.is_authenticated:
-        current_user.ping()
-        if not current_user.confirmed and request.endpoint[:5] != 'auth.' and request.endpoint !='static':
-            return redirect(url_for('auth.unconfirmed'))
 
 #转到未确认帐户模板
 @auth.route('/unconfirmed')

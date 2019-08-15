@@ -55,6 +55,7 @@ class User(UserMixin, db.Model):
     about_me = db.Column(db.Text())
     last_seen = db.Column(db.DateTime(),default = datetime.utcnow)
     member_since = db.Column(db.DateTime(),default = datetime.utcnow)
+    posts = db.relationship('Post',backref = 'author',lazy = 'dynamic')
 
     #每次登录后刷新last_seen时间
     def ping(self):
@@ -145,6 +146,14 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
     
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = db.Column(db.Integer,primary_key = True)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime,index = True,default = datetime.utcnow)
+    author_id = db.Column(db.Integer,db.ForeignKey('users.id'))
+
+
 class AnonymousUser(AnonymousUserMixin):
     def can(self,permissions):
         return False
