@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 
 {% block page_content %}
 <div class="page-header">
@@ -26,10 +28,19 @@
 <div>
     {% if user == current_user %}
     <a href="{{ url_for('.edit_profile') }}" class="btn btn-default">修改个人资料</a>
+    <a href="{{ url_for('auth.change_password') }}" style="font-size: 14px" class="btn btn-default">修改密码</a>
+    <a href="{{ url_for('auth.change_email_request') }}" style="font-size: 14px" class="btn btn-default">修改邮箱</a>
     {% endif %}
 
     {% if current_user.is_administrator() %}
     <a href="{{ url_for('.edit_profile_admin',id = user.id) }}" class="btn btn-danger">修改个人资料[管理员]</a>
     {% endif %}
 </div>
+<h3>{{ user.username }}发布的文章</h3>
+    {% include "_posts.html" %}
+    {% if pagination %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pagination, '.user',username= user.username) }}
+    </div>
+    {% endif %}
 {% endblock %}
