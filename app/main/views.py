@@ -5,7 +5,7 @@ from config import config
 from . import main
 from .forms import PostForm,EditProfileForm,EditProfileAdminForm
 from .. import db
-from ..models import User,Permission,Role,Post
+from ..models import User,Permission,Role,Post,Follow
 from ..email import send_mail
 from ..decorators import admin_required,permission_required
 
@@ -109,3 +109,30 @@ def edit(id):
         return redirect(url_for('.post',id = post.id))
     form.body.data = post.body
     return render_template('edit_post.html',form = form)
+
+@main.route('/follow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def follow(username):
+    user = User.query.filter_by(username = username).first()
+    if user is None:
+        flash('此用户不存在')
+        return redirect(url_for('.index'))
+    if current_user.is_following(user):
+        flash('你已经关注这个用户.')
+        return redirect(url_for('.user',username = username))
+    current_user.follow(user)
+    flash('你关注了%s.' % username)
+    return redirect(url_for('.user',username = username))
+
+@main.route('/unfollow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def unfollow(username):
+    user = User.query.filter_by(username = username).first()
+    if user is None:
+        flash('此用户不存在')
+        return redirect(url_for('.index'))
+    current_user.unfollow(user)
+    flash('取消关注%s.' % username)
+    return redirect(url_for('.user',username = username))

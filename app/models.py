@@ -26,6 +26,7 @@ class Role(db.Model):
     permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
 
+
     @staticmethod
     def insert_roles():
         roles = {
@@ -41,6 +42,15 @@ class Role(db.Model):
                 role.default = roles[r][1]
                 db.session.add(role)
             db.session.commit()
+
+
+#关注关联表
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    followed_id = db.Column(db.Integer,db.ForeignKey('users.id'),primary_key = True)
+    follower_id = db.Column(db.Integer,db.ForeignKey('users.id'),primary_key = True)
+    timestamp = db.Column(db.DateTime,default = datetime.utcnow)
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -59,10 +69,9 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime(),default = datetime.utcnow)
     posts = db.relationship('Post',backref = 'author',lazy = 'dynamic')
 
-    #每次登录后刷新last_seen时间
-    def ping(self):
-        self.last_seen = datetime.utcnow()
-        db.session.add(self)
+    #拆分Follow表
+    followed = db.relationship('Follow',foreign_keys = [Follow.follower_id],backref = db.backref('follower',lazy = 'joined'),lazy = 'dynamic',cascade = 'all,delete-orphan')
+    followers = db.relationship('Follow',foreign_keys = [Follow.followed_id],backref = db.backref('followed',lazy = 'joined'),lazy = 'dynamic',cascade = 'all,delete-orphan')
 
     def __init__(self,**kwargs):
         super(User,self).__init__(**kwargs)
@@ -71,6 +80,32 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(permissions = 0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default = True).first()
+
+    #关注关系辅助方法
+    def follow(self,user):
+        if not self.is_following(user):
+            f = Follow(followed = user)
+            self.followed.append(f)
+    
+    def unfollow(self,user):
+        f = self.followed.filter_by(followed_id = user.id).first()
+        if f:
+            self.followed.remove(f)
+
+    def is_following(self,user):
+        if user.id is None:
+            return False
+        return self.followed.filter_by(followed_id = user.id).first() is not None
+
+    def is_followed_by(self,user):
+        if user.id is None:
+            return False
+        return self.followers.filter_by(follower_id = user.id).first() is not None
+
+    #每次登录后刷新last_seen时间
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
 
     def can(self,permissions):
         return self.role is not None and (self.role.permissions & permissions) == permissions
@@ -199,6 +234,7 @@ class Post(db.Model):
     def on_changed_body(target,value,oldvalue,initiator):
         allowed_tags = ['a','abbr','acronym','b','blockquote','code','em','i','li','ol','pre','strong','ul','h1','h2','h3','p']
         target.body_html = bleach.linkify(bleach.clean(markdown(value,output_format='html'),tags = allowed_tags,strip = True))
+
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self,permissions):
