@@ -122,6 +122,7 @@ def follow(username):
         flash('你已经关注这个用户.')
         return redirect(url_for('.user',username = username))
     current_user.follow(user)
+    db.session.commit()
     flash('你关注了%s.' % username)
     return redirect(url_for('.user',username = username))
 
@@ -133,6 +134,32 @@ def unfollow(username):
     if user is None:
         flash('此用户不存在')
         return redirect(url_for('.index'))
+    if not current_user.is_following(user):
+        flash('你没有关注这个用户')
+        return redirect(url_for('.user',username = username))
     current_user.unfollow(user)
+    db.session.commit()
     flash('取消关注%s.' % username)
     return redirect(url_for('.user',username = username))
+
+@main.route('/followers/<username>')
+def followers(username):
+    user = User.query.filter_by(username = username).first()
+    if user is None:
+        flash('此用户不存在.')
+        return redirect(url_for('.index'))
+    page = request.args.get('page',1,type = int)
+    pagination = user.followers.paginate(page,per_page = current_app.config['FLASKY_FOLLOWERS_PER_PAGE'],error_out = False)
+    follows = [{'user':item.follower,'timestamp':item.timestamp} for item in pagination.items]
+    return render_template('followers.html',user = user,pagination = pagination, follows = follows,title = '的粉丝 ',endpoint = '.followers')
+
+@main.route('/followed_by/<username>')
+def followed_by(username):
+    user = User.query.filter_by(username = username).first()
+    if user is None:
+        flash('此用户不存在.')
+        return redirect(url_for('.index'))
+    page = request.args.get('page',1,type = int)
+    pagination = user.followed.paginate(page,per_page = current_app.config['FLASKY_FOLLOWERS_PER_PAGE'],error_out = False)
+    follows = [{'user':item.followed,'timestamp':item.timestamp} for item in pagination.items]
+    return render_template('followers.html',user = user,pagination = pagination, follows = follows,title = '的关注',endpoint = '.followed_by')
