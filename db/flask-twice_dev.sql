@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: 2019-08-20 17:18:11
+-- Generation Time: 2019-08-22 17:24:36
 -- 服务器版本： 5.7.14
 -- PHP Version: 5.6.25
 
@@ -55,11 +55,12 @@ CREATE TABLE `follows` (
 
 INSERT INTO `follows` (`followed_id`, `follower_id`, `timestamp`) VALUES
 (1, 2, '2019-08-20 09:03:45'),
-(2, 1, '2019-08-20 09:05:57'),
+(2, 1, '2019-08-22 08:13:15'),
 (2, 3, '2019-08-20 09:03:29'),
 (3, 1, '2019-08-20 09:07:30'),
 (13, 1, '2019-08-20 09:07:13'),
 (17, 1, '2019-08-20 09:07:18'),
+(19, 1, '2019-08-22 07:40:05'),
 (21, 1, '2019-08-20 09:07:06'),
 (24, 1, '2019-08-20 09:07:01'),
 (24, 2, '2019-08-20 09:04:18'),
@@ -228,7 +229,8 @@ INSERT INTO `posts` (`id`, `body`, `timestamp`, `author_id`, `body_html`) VALUES
 (134, '我们都不知道自己会去向哪里，有什么地方是永恒的？', '2019-08-16 09:02:47', 2, '<p>我们都不知道自己会去向哪里，有什么地方是永恒的？</p>'),
 (135, '*这是一篇*拥有富文本能力**Markdown**的文章\r\n', '2019-08-16 09:11:34', 2, '<p><em>这是一篇</em>拥有富文本能力<strong>Markdown</strong>的文章</p>'),
 (136, '何时归', '2019-08-20 03:55:27', 2, '<p>何时归</p>'),
-(137, '有些人', '2019-08-20 06:53:58', 1, '<p>有些人</p>');
+(137, '有些人', '2019-08-20 06:53:58', 1, '<p>有些人</p>'),
+(138, '我也不明白', '2019-08-22 08:22:05', 1, '<p>我也不明白</p>');
 
 -- --------------------------------------------------------
 
@@ -277,7 +279,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `username`, `role_id`, `password_hash`, `confirmed`, `name`, `location`, `about_me`, `last_seen`, `member_since`) VALUES
-(1, '15078843336@163.com', 'admi', 3, 'pbkdf2:sha256:150000$ioAEWO0b$e96544da90c570c466134ca46cc14d78c9cc54e09c8193b0ed5c83b30a91c5d5', 1, '免费领取人参五味子颗粒', '钦州', 'ddd', '2019-08-20 09:07:39', '2019-08-15 08:47:05'),
+(1, '15078843336@163.com', 'admi', 3, 'pbkdf2:sha256:150000$ioAEWO0b$e96544da90c570c466134ca46cc14d78c9cc54e09c8193b0ed5c83b30a91c5d5', 1, '免费领取人参五味子颗粒', '钦州', 'ddd', '2019-08-22 08:22:05', '2019-08-15 08:47:05'),
 (2, '46361381@qq.com', 'jack', 2, 'pbkdf2:sha256:150000$UWSjdfzE$6ddb7c3f0377393e5893be9edde38d77e3ff50d82e8b5840f67305b0c2bdd537', 1, '梁增晃', '南宁', 'f', '2019-08-20 09:04:18', '2019-08-15 08:47:55'),
 (3, '328462177@qq.com', 'forlove', 2, 'pbkdf2:sha256:150000$TlZKEsyF$160d8ba10acfa8745fbb577a0de13d9e0759630169c342d549b2e49152cc3bc0', 1, NULL, NULL, NULL, '2019-08-20 09:03:29', '2019-08-16 00:40:51'),
 (4, 'jesse@twinder.edu', 'tina69', 1, 'pbkdf2:sha256:150000$t42YxI1n$c994be5200625d0673e43535f746fda83bdc75d82fbc06b9506d4369de0781ab', 1, 'Betty Barnes', 'Monte Sereno', 'Quisque porta volutpat erat.', '2019-08-16 01:31:21', '2019-08-07 00:00:00'),
@@ -430,7 +432,7 @@ ALTER TABLE `users`
 -- 使用表AUTO_INCREMENT `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=138;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=139;
 --
 -- 使用表AUTO_INCREMENT `roles`
 --

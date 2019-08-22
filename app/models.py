@@ -168,6 +168,9 @@ class User(UserMixin, db.Model):
         db.session.add(self)
         return True
         
+    @property
+    def followed_posts(self):
+        return Post.query.join(Follow,Follow.followed_id == Post.author_id).filter(Follow.follower_id == self.id)
 
     @property
     def password(self):
