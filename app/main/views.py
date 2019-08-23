@@ -3,9 +3,9 @@ from flask_login import login_required,current_user
 from datetime import datetime
 from config import config
 from . import main
-from .forms import PostForm,EditProfileForm,EditProfileAdminForm
+from .forms import PostForm,EditProfileForm,EditProfileAdminForm,CommentForm
 from .. import db
-from ..models import User,Permission,Role,Post,Follow
+from ..models import User,Permission,Role,Post,Follow,Comment
 from ..email import send_mail
 from ..decorators import admin_required,permission_required
 
@@ -112,10 +112,22 @@ def edit_profile_admin(id):
     form.about_me.data = user.about_me
     return render_template('edit_profile.html',form = form,user = user)
 
-@main.route('/post/<int:id>')
+@main.route('/post/<int:id>',methods = ['GET','POST'])
 def post(id):
     post = Post.query.get_or_404(id)
-    return render_template('post.html',posts = [post])
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body = form.body.data,post = post,author = current_user._get_current_object())
+        db.session.add(comment)
+        db.session.commit()
+        flash('你的评论已经发布')
+        return redirect(url_for('.post',id = post.id,page = -1))
+    page = request.args.get('page',1,type = int)
+    if page == -1:
+        page = (post.comments.count() - 1) / current_app.config['FLASKY_COMMENTS_PER_PAGE'] + 1
+    pagination = post.comments.order_by(Comment.timestamp.asc()).paginate(page,per_page = current_app.config['FLASKY_COMMENTS_PER_PAGE'],error_out = False)
+    comments = pagination.items
+    return render_template('post.html',posts = [post],form = form, comments = comments,pagination = pagination)
 
 @main.route('/edit/<int:id>',methods = ['GET','POST'])
 @login_required
@@ -186,3 +198,32 @@ def followed_by(username):
     pagination = user.followed.paginate(page,per_page = current_app.config['FLASKY_FOLLOWERS_PER_PAGE'],error_out = False)
     follows = [{'user':item.followed,'timestamp':item.timestamp} for item in pagination.items]
     return render_template('followers.html',user = user,pagination = pagination, follows = follows,title = '的关注',endpoint = '.followed_by')
+
+# @main.route('/moderate')
+# @login_required
+# @permission_required(Permission.MODERATE_COMMENTS)
+# def moderate():
+#     page = request.args.get('page',1,type = int)
+#     pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(page,per_page = current_app.config['FLASKY_COMMENTS_PER_PAGE'],error_out = False)
+#     comments = pagination.items
+#     return render_template('moderate.html',pagination = pagination,page = page, comments = comments)
+
+@main.route('/moderate/enable/<int:id>')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate_enable(id):
+    comment = Comment.query.get_or_404(id)
+    comment.disabled = False
+    db.session.add(comment)
+    db.session.commit()
+    return redirect(url_for('.post',id = comment.post_id))
+
+@main.route('/moderate/disable/<int:id>')
+@login_required
+@permission_required(Permission.MODERATE_COMMENTS)
+def moderate_disable(id):
+    comment = Comment.query.get_or_404(id)
+    comment.disabled = True
+    db.session.add(comment)
+    db.session.commit()
+    return redirect(url_for('.post',id = comment.post_id))

@@ -8,6 +8,10 @@ class PostForm(FlaskForm):
     body = PageDownField('文章内容',validators=[DataRequired()])
     submit = SubmitField('提交')
 
+class CommentForm(FlaskForm):
+    body = StringField('',validators=[DataRequired()])
+    submit = SubmitField('评论')
+
 class EditProfileForm(FlaskForm):
     name = StringField('真实姓名',validators=[Length(0,64)])
     location = StringField('位置',validators=[Length(0,64)])
